@@ -1,0 +1,21 @@
+struct Compression {
+    vector <int> numbers;
+    public:
+    void insert(int x) {
+        numbers.push_back(x);
+    }
+    public:
+    void compress() {
+        sort(numbers.begin(), numbers.end());
+        numbers.erase(std::unique(numbers.begin(), numbers.end()), numbers.end());
+    }
+    public:
+    int get_by_pos(int pos) {
+        return numbers[pos-1];
+    }
+    public:
+    int get(int x) {
+        int pos = lower_bound(numbers.begin(), numbers.end(), x) - numbers.begin();
+        return pos + 1;
+    }
+} cmpr;

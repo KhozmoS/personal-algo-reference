@@ -1,0 +1,25 @@
+vi z_function( string s ) {
+    
+    int N = sz(s);
+
+    vi z(N,0);
+
+    for( int i = 1 , l = 0 , r = 0 ; i < N ; i++ ) {
+
+        if( i <= r )
+            z[i] = min( z[i-l] , r-i+1 );
+
+        while( z[i]+i<N && s[z[i]] == s[z[i]+i] )
+            ++z[i];
+
+        if( i+z[i]-1 > r ) {
+            r = i+z[i]-1;
+            l = i;
+        }
+        
+
+    }
+    
+    return z;
+    
+}

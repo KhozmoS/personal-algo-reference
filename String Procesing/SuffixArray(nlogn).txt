@@ -1,0 +1,103 @@
+struct item {
+    int rank1, rank2 , index;
+
+    item() {
+        rank1 = 0;
+        rank2 = 0;
+        index = 0;
+    }
+
+    bool operator < ( const item& X ) const {
+        if( this->rank1 == X.rank1 ) {
+            if( this->rank2 == X.rank2 )
+                return this->index<X.index;
+            else
+                return this->rank2<X.rank2;
+        } else
+            return this->rank1<X.rank1;
+
+    }
+
+};
+struct SuffixArray {
+    int n , stp, MAXN;
+    vector < vector <int> > P;
+    vector <item> SA;
+    SuffixArray(const string& cad) {
+        n = cad.size();
+        MAXN = max(n + 5, 200);
+        vector <int> filler(20, 0);
+        P.assign(MAXN, filler);
+        SA.assign(MAXN, item());
+        build(cad);
+    }
+
+    void radixSort() {
+
+        vi cnt;
+        vector <item> copied(MAXN);
+
+
+        cnt.assign(MAXN,0);
+        for( int i = 0 ; i < n ; i++ ) {
+            cnt[ SA[i].rank2+1 ]++;
+        }
+        for( int i = 1; i < MAXN ; i++ )
+            cnt[i] += cnt[i-1];
+        for( int i = n-1 ; i >= 0 ; i-- ) {
+            copied[ --cnt[ SA[i].rank2+1 ] ] = SA[i];
+        }
+        for( int i = 0 ; i < n ; i++ )
+            SA[i] = copied[i];
+
+        cnt.assign(MAXN,0);
+        for( int i = 0 ; i < n ; i++ )
+            cnt[ SA[i].rank1+1 ]++;
+        for( int i = 1; i < MAXN ; i++ )
+            cnt[i] += cnt[i-1];
+        for( int i = n-1 ; i >= 0 ; i-- )
+            copied[ --cnt[ SA[i].rank1+1 ] ] = SA[i];
+        for( int i = 0 ; i < n ; i++ )
+            SA[i] = copied[i];
+
+    }
+
+    void build( const string& cad ) {
+        stp = 0;
+        for( int i = 0 ; i < n ; i++ )
+            P[i][0] = cad[i];
+
+        for( int cnt = 1 ; cnt >> 1 < n ; cnt <<= 1 ) {
+
+            stp++;
+            for( int i = 0 ; i < n ; i++ ) {
+                SA[i].rank1 = P[i][stp-1];
+                SA[i].rank2 = (i+cnt<n ? P[i+cnt][stp-1] : -1 );
+                SA[i].index = i;
+            }
+
+            radixSort();
+
+            for( int i = 0 ; i < n ; i++ )
+                P[SA[i].index][stp] = ( (i > 0 && SA[i].rank1==SA[i-1].rank1 &&
+                                                  SA[i].rank2==SA[i-1].rank2) ? P[SA[i-1].index][stp] : i);
+
+        }
+
+    }
+    int lcp( int a, int b ) {
+        if( a==b )
+            return n-SA[a].index;
+        a = SA[a].index;
+        b = SA[b].index;
+        int res = 0;
+        for( int k = stp; k>=0 && a < n && b < n ; k-- ) {
+            if( P[a][k] == P[b][k] ) {
+                a += (1<<k);
+                b += (1<<k);
+                res += (1<<k);
+            }
+        }
+        return res;
+    }
+};

@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+template <typename T>
+class SegmentTree {
+    int n;
+    T neutro = INT_MAX;
+
+    vector <T> st;
+    vector <T> lazy;
+
+    public:
+    SegmentTree (int n) {
+        this->n = n;
+        this->st = vector <T> (n*4 + 5);
+    }
+    public:
+    SegmentTree (vector <T> v) {
+        this->n = v.size()-1;
+        assert(this->n > 0);
+        this->st = vector <T> (n*4 + 5);
+        this->lazy = vector <T> (n*4 + 5, neutro);
+        build(1, 1, n, v);
+    }
+
+    // FUNCTIONS TO MODIFY
+    private:
+    void push(int node, T val) {
+        if(node < 4 * n) {
+            st[node] = val;
+            lazy[node] = val;
+        }
+    }
+    private:
+    T combine(T a, T b) {
+        return min(a, b);
+    }
+    // END FUNCTIONS TO MODIFY
+
+    private:
+    void build(int node, int x, int y, const vector <T>& v) {
+        if (x==y) {
+            st[node] = v[x];
+            return;
+        }
+        int mt = (x+y)>>1;
+        this->build(node<<1, x, mt, v);
+        this->build((node<<1)+1, mt+1, y, v);
+        st[node] = combine(st[node<<1], st[(node<<1)+1]);
+    }
+    private:
+    void upd(int node, int x, int y, const int& a, const int& b, T val) {
+        if(a > y || b < x)
+            return;
+        if(lazy[node] != this->neutro) {
+            push(node<<1, lazy[node]);
+            push((node<<1)+1, lazy[node]);
+            lazy[node] = this->neutro;
+        }
+        if(a <= x && y <= b) {
+            push(node, val);
+            return;
+        }
+        int mid = (x + y) >> 1;
+        upd(node<<1, x, mid, a, b, val);
+        upd((node<<1)+1, mid+1, y, a, b, val);
+        st[node] = combine(st[node<<1], st[(node<<1)+1]);
+    }
+    private:
+    T qry (int node, int x, int y, const int& a, const int& b) {
+        if(a > y || b < x)
+            return this->neutro;
+        if(lazy[node] != this->neutro) {
+            push(node<<1, lazy[node]);
+            push((node<<1)+1, lazy[node]);
+            lazy[node] = this->neutro;
+        }
+        if(a <= x && y <= b) {
+            return st[node];
+        }
+        int mid = (x + y) >> 1;
+        return combine( qry(node<<1, x, mid, a, b), qry((node<<1)+1, mid+1, y, a, b) );
+    }
+
+    public:
+    void update(int a, int b, T val) {
+        this->upd(1, 1, this->n, a, b, val);
+    }
+    public:
+    T query(int a, int b) {
+        return this->qry(1, 1, this->n, a, b);
+    }
+};
+
+int main()
+{
+  ios_base::sync_with_stdio(0);
+  cin.tie(0); cout.tie(0);
+    // NOTE THAT IMPORTANT INDICES ARE FROM 1 TO 5
+  vector <int> v = {-1, 1, 3, 2, 4, 5};
+  SegmentTree<int> ST( v );
+  cout<<ST.query(2, 5)<<"\n";
+  ST.update(1, 3, -5);
+  cout<<ST.query(2, 4)<<"\n";
+}

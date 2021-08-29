@@ -1,0 +1,15 @@
+struct query {
+    int l, r, id;
+    query(int l, int r, int id) {
+        this->l = l;
+        this->r = r;
+        this->id = id;
+    }
+    inline ii get() const {
+        int sq = ceil(sqrt(n));
+        return {l / sq, ((l / sq) & 1) ? -r : +r};
+    }
+    bool operator < (const query &b) const {
+        return get() < b.get();
+    }
+};

@@ -1,0 +1,42 @@
+struct matriz {
+
+    vvi m;
+    int SZ;
+    matriz( int Sz ) {
+        vi v(Sz+1, 0);
+        m = vvi( Sz+1, v );
+        SZ = Sz;
+    }
+    matriz( int Sz , int V ) {
+        vi v(Sz+1, 0);
+        m = vvi( Sz+1, v );
+        SZ = Sz;
+
+        for( int i = 0 ; i <= SZ ; i++ )
+            m[i][i] = V;
+    }
+    matriz operator * ( const matriz &X ) const {
+        matriz res = matriz( SZ );
+        for( int i = 1 ; i <= SZ ; i++ )
+            for( int j = 1; j <= SZ ; j++ )
+                for( int k = 1; k <= SZ ; k++ )
+                    res.m[i][j] = ( res.m[i][j] + ( 1ll * m[i][k] * X.m[k][j] ) % mod ) % mod;
+        return res;
+    }
+
+};
+
+
+matriz expMatriz( matriz a , ll b ) {
+    matriz res = matriz( a.SZ , 1 );
+    while( b ) {
+
+        if( b%2==1 ) {
+            res = res*a;
+        }
+        a = a*a;
+        b /= 2;
+
+    }
+    return res;
+}
