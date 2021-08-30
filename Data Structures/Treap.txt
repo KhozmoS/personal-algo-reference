@@ -1,0 +1,86 @@
+namespace Treap {
+    struct item {
+        int key, siz;
+        ll prior;
+        item *l, *r;
+        item () : key(0), prior(rand()), l(NULL), r(NULL), siz(0) { }
+        item (ll key) : key(key), prior(rand()), l(NULL), r(NULL), siz(0) { }
+    };
+    typedef item* pitem;
+
+    ll get_size (pitem t) {
+        return t ? t->siz : 0;
+    }
+
+    void upd_size (pitem t) {
+        if (t)
+            t->siz = 1 + get_size(t->l) + get_size (t->r);
+    }
+
+    void split (pitem t, ll key, pitem & l, pitem & r) {
+        if (!t)
+            l = r = NULL;
+        else if (t->key <= key)
+            split (t->r, key, t->r, r),  l = t;
+        else
+            split (t->l, key, l, t->l),  r = t;
+        upd_size(l);
+        upd_size(r);
+    }
+    void insert (pitem & t, pitem it) {
+        if (!t) {
+            t = it;
+        }
+        else if (it->prior > t->prior) {
+            split (t, it->key, it->l, it->r),  t = it;
+        }
+        else {
+            insert (t->key <= it->key ? t->r : t->l, it);
+        }
+        upd_size(t);
+    }
+
+    void merge (pitem & t, pitem l, pitem r) {
+        if (!l || !r)
+            t = l ? l : r;
+        else if (l->prior > r->prior)
+            merge (l->r, l->r, r),  t = l;
+        else
+            merge (r->l, l, r->l),  t = r;
+        upd_size(t);
+    }
+
+    void erase (pitem & t, ll key) {
+        if (t->key == key) {
+            pitem th = t;
+            merge (t, t->l, t->r);
+            delete th;
+        }
+        else
+            erase (key < t->key ? t->l : t->r, key);
+        upd_size(t);
+    }
+
+    pitem unite (pitem l, pitem r) {
+        if (!l || !r)  return l ? l : r;
+        if (l->prior < r->prior)  swap (l, r);
+        pitem lt, rt;
+        split (r, l->key, lt, rt);
+        l->l = unite (l->l, lt);
+        l->r = unite (l->r, rt);
+        return l;
+    }
+    void erase_whole_tree(pitem& t) {
+        if (!t) return;
+        erase_whole_tree(t->l);
+        erase_whole_tree(t->r);
+        t = NULL;
+    }
+    void print(pitem t, int p = 1) {
+        if (!t) return;
+        cout<<p<<": "<<t->key<<"\n";
+        print(t->l, p*2);
+        print(t->r, p*2+1);
+    }
+}
+Treap::pitem treap_tree;
